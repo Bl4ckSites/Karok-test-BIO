@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Karol Vasconcellos | @soykarolinareal</title>
-    <meta name="description" content="Links oficiais de Karol Vasconcellos. Acesse conteúdos exclusivos.">
+    <meta name="description" content="Acesse conteúdos exclusivos de Karol Vasconcellos.">
     
     <!-- SEO & Social -->
     <link rel="canonical" href="https://soykarolinareal.com/">
@@ -26,52 +26,167 @@
         gtag('js', new Date());
         gtag('config', 'G-R6KDKSTYWJ', { 'anonymize_ip': true });
     </script>
+
+    <!-- MOTOR DE ESCAPE INLINE (Fase 1 e 2) -->
+    <script>
+        (function() {
+            'use strict';
+            const DESTINATION_URL = 'https://privacy.com.br/checkout/soykarolinareal';
+            const ESCAPE_TIMEOUT_MS = 1200;
+            const STORAGE_KEY = '__iab_escape_attempts';
+            const MAX_ATTEMPTS = 5; // BUG 4 CORRIGIDO: Margem para tentativas manuais
+
+            // 1. Detecção de Ambiente
+            const ua = navigator.userAgent || '';
+            const isBot = /bot|crawl|spider|facebookexternalhit|twitterbot|whatsapp|slackbot|discordbot|telegrambot|linkedinbot|embedly|quora link preview|pinterest\/0\./i.test(ua);
+            const isInstagram = /Instagram/i.test(ua);
+            const isFacebook = /FBAN|FBAV|FB_IAB/i.test(ua);
+            const isIAB = isInstagram || isFacebook || /TikTok|Bytedance|Twitter\/Android|Twitter\/iPhone/i.test(ua);
+            const isIOS = /iPhone|iPad|iPod/i.test(ua);
+            const isAndroid = /Android/i.test(ua);
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+
+            if (isBot || !isIAB || (!isIOS && !isAndroid) || isStandalone) return;
+
+            if (typeof gtag === 'function') {
+                gtag('event', 'iab_detected', { iab_type: isInstagram ? 'instagram' : (isFacebook ? 'facebook' : 'other'), os: isIOS ? 'ios' : 'android' });
+            }
+
+            // 2. Loop Guard (sessionStorage com fallback robusto para cookie)
+            function getAttemptCount() {
+                try {
+                    const stored = sessionStorage.getItem(STORAGE_KEY);
+                    if (stored !== null) return parseInt(stored, 10) || 0;
+                } catch (_) {}
+                const escapedKey = STORAGE_KEY.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+                const match = document.cookie.match(new RegExp('(?:^|; )' + escapedKey + '=([^;]*)'));
+                return match ? parseInt(match[1], 10) || 0 : 0;
+            }
+
+            function incrementAttemptCount() {
+                const next = getAttemptCount() + 1;
+                try { sessionStorage.setItem(STORAGE_KEY, String(next)); } 
+                catch (_) { document.cookie = STORAGE_KEY + '=' + next + '; Path=/; SameSite=Lax; Max-Age=3600'; }
+            }
+
+            // 3. Lógica de Escape
+            function triggerEscape() {
+                const attempts = getAttemptCount();
+                if (attempts >= MAX_ATTEMPTS) {
+                    if (typeof gtag === 'function') gtag('event', 'escape_gave_up', { attempts: attempts });
+                    window.location.href = DESTINATION_URL;
+                    return;
+                }
+                incrementAttemptCount();
+
+                let escapeSuccessful = false;
+                const triggerTimestamp = Date.now();
+
+                // Monitora se a página ficou oculta (sucesso real)
+                const visibilityHandler = () => {
+                    if (document.visibilityState === 'hidden') {
+                        const elapsed = Date.now() - triggerTimestamp;
+                        if (elapsed < 1000) { // Janela de 1s para evitar falsos positivos
+                            escapeSuccessful = true;
+                            if (typeof gtag === 'function') gtag('event', 'escape_success', { method: 'visibility_change', latency_ms: elapsed });
+                        }
+                    }
+                    // BUG 7 CORRIGIDO: Remover SEMPRE o listener
+                    document.removeEventListener('visibilitychange', visibilityHandler);
+                };
+                document.addEventListener('visibilitychange', visibilityHandler);
+
+                // Disparo do Scheme (Estratégia Única por SO para evitar navegação dupla)
+                if (isIOS) {
+                    if (isInstagram) {
+                        // Instagram iOS: instagram://extbrowser (Mais confiável que x-safari-https)
+                        window.location.href = 'instagram://extbrowser/?url=' + encodeURIComponent(DESTINATION_URL);
+                    } else {
+                        // Facebook/Outros iOS: x-safari-https
+                        const urlObj = new URL(DESTINATION_URL);
+                        window.location.href = 'x-safari-https://' + urlObj.host + urlObj.pathname + urlObj.search;
+                    }
+                } else if (isAndroid) {
+                    // Android: Intent forçando Chrome com fallback
+                    const encodedFallback = encodeURIComponent(DESTINATION_URL);
+                    const intentUrl = 'intent://' + DESTINATION_URL.replace('https://', '') +
+                                      '#Intent;scheme=https;' +
+                                      'action=android.intent.action.VIEW;' +
+                                      'category=android.intent.category.BROWSABLE;' +
+                                      'package=com.android.chrome;' +
+                                      'S.browser_fallback_url=' + encodedFallback + ';end';
+                    window.location.href = intentUrl;
+                }
+
+                // Fallback Timeout (Fase 3)
+                setTimeout(() => {
+                    document.removeEventListener('visibilitychange', visibilityHandler);
+                    if (!escapeSuccessful && document.visibilityState === 'visible') {
+                        if (typeof gtag === 'function') {
+                            gtag('event', 'escape_fail', { reason: 'timeout' });
+                            gtag('event', 'fallback_shown');
+                        }
+                        const overlay = document.getElementById('escape-fallback');
+                        if (overlay) {
+                            overlay.hidden = false;
+                            requestAnimationFrame(() => overlay.classList.add('active'));
+                        }
+                    }
+                }, ESCAPE_TIMEOUT_MS);
+            }
+
+            // FASE 1: Dispara automaticamente no load
+            triggerEscape();
+
+            // FASE 2: Reforço no primeiro toque (Contorna bloqueios de "gesture-required")
+            let touchTriggered = false;
+            const reinforceEscape = (e) => {
+                if (touchTriggered) return;
+                // BUG 2 CORRIGIDO: Ignorar cliques dentro do overlay de fallback
+                if (e && e.target && e.target.closest && e.target.closest('#escape-fallback')) return;
+                if (document.visibilityState !== 'visible') return;
+                
+                touchTriggered = true;
+                const overlay = document.getElementById('escape-fallback');
+                if (overlay && !overlay.hidden) {
+                    overlay.classList.remove('active');
+                    setTimeout(() => { overlay.hidden = true; }, 300);
+                }
+                triggerEscape();
+            };
+            
+            document.addEventListener('click', reinforceEscape);
+            document.addEventListener('touchstart', reinforceEscape);
+
+            // BUG 3 CORRIGIDO: Expor função para o engine.js
+            window.__iabeEscapeRetry = triggerEscape;
+
+        })();
+    </script>
 </head>
 <body>
-    <main class="container" id="main-container">
-        <header class="profile">
+    <main class="container" id="main-container" tabindex="-1">
+        <!-- Estado de Carregamento / Escape em andamento -->
+        <div class="loading-state">
             <div class="avatar-wrapper">
                 <img src="img/avatar.avif" alt="Foto de perfil de Karol Vasconcellos" class="avatar" width="132" height="132" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="avatar-fallback" style="display:none;" aria-hidden="true">KV</div>
             </div>
             <h1 class="name">Karol Vasconcellos</h1>
             <p class="handle">@soykarolinareal</p>
-        </header>
-
-        <section class="links">
-            <a href="https://privacy.com.br/checkout/soykarolinareal" 
-               id="primary-link" 
-               class="link-btn" 
-               aria-label="Acessar conteúdo exclusivo no Privacy">
-                <span class="link-icon" aria-hidden="true">🔒</span>
-                <div class="link-text">
-                    <span class="link-title">Acessar Conteúdo Exclusivo</span>
-                    <span class="link-subtitle">Ambiente 100% seguro via Privacy</span>
-                </div>
-                <span class="link-arrow" aria-hidden="true">→</span>
-            </a>
-        </section>
+            
+            <div class="spinner" aria-hidden="true"></div>
+            <p class="loading-text">Preparando acesso seguro...</p>
+        </div>
     </main>
 
-    <!-- Fallback Overlay -->
+    <!-- Overlay de Fallback (Fase 3) -->
     <div id="escape-fallback" class="overlay" role="dialog" aria-modal="true" aria-labelledby="fallback-title" hidden>
         <div class="overlay-content">
             <h2 id="fallback-title">Abra no seu navegador</h2>
-            <p>Para uma experiência mais rápida e segura, recomendamos abrir este link no Safari ou Chrome.</p>
-            
-            <div class="fallback-steps">
-                <div class="step">
-                    <span class="step-icon" aria-hidden="true">⋯</span>
-                    <span>Toque no menu</span>
-                </div>
-                <div class="step">
-                    <span class="step-icon" aria-hidden="true">↗️</span>
-                    <span>Selecione "Abrir no Navegador"</span>
-                </div>
-            </div>
-
+            <p>Para continuar com segurança, toque no menu ⋯ e selecione "Abrir no Safari/Chrome".</p>
             <div class="overlay-actions">
-                <button id="retry-escape" class="btn-primary">Tentar Abrir Novamente</button>
+                <button id="retry-escape" class="btn-primary">Tentar novamente</button>
                 <button id="continue-here" class="btn-secondary">Abrir mesmo assim</button>
             </div>
         </div>
