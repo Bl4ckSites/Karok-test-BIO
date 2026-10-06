@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Karol Vasconcellos | @soykarolinareal</title>
+    <meta name="description" content="Links oficiais de Karol Vasconcellos. Acesse conteúdos exclusivos.">
+    
+    <!-- SEO & Social -->
+    <link rel="canonical" href="https://soykarolinareal.com/">
+    <meta property="og:title" content="Karol Vasconcellos | @soykarolinareal">
+    <meta property="og:description" content="Acesse conteúdos exclusivos e seguros.">
+    <meta property="og:image" content="https://soykarolinareal.com/img/avatar.avif">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Performance -->
+    <link rel="preload" href="img/avatar.avif" as="image" fetchpriority="high">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R6KDKSTYWJ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-R6KDKSTYWJ', { 'anonymize_ip': true });
+    </script>
+</head>
+<body>
+    <main class="container" id="main-container">
+        <header class="profile">
+            <div class="avatar-wrapper">
+                <img src="img/avatar.avif" alt="Foto de perfil de Karol Vasconcellos" class="avatar" width="132" height="132" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="avatar-fallback" style="display:none;" aria-hidden="true">KV</div>
+            </div>
+            <h1 class="name">Karol Vasconcellos</h1>
+            <p class="handle">@soykarolinareal</p>
+        </header>
+
+        <section class="links">
+            <a href="https://privacy.com.br/checkout/soykarolinareal" 
+               id="primary-link" 
+               class="link-btn" 
+               aria-label="Acessar conteúdo exclusivo no Privacy">
+                <span class="link-icon" aria-hidden="true">🔒</span>
+                <div class="link-text">
+                    <span class="link-title">Acessar Conteúdo Exclusivo</span>
+                    <span class="link-subtitle">Ambiente 100% seguro via Privacy</span>
+                </div>
+                <span class="link-arrow" aria-hidden="true">→</span>
+            </a>
+        </section>
+    </main>
+
+    <!-- Fallback Overlay -->
+    <div id="escape-fallback" class="overlay" role="dialog" aria-modal="true" aria-labelledby="fallback-title" hidden>
+        <div class="overlay-content">
+            <h2 id="fallback-title">Abra no seu navegador</h2>
+            <p>Para uma experiência mais rápida e segura, recomendamos abrir este link no Safari ou Chrome.</p>
+            
+            <div class="fallback-steps">
+                <div class="step">
+                    <span class="step-icon" aria-hidden="true">⋯</span>
+                    <span>Toque no menu</span>
+                </div>
+                <div class="step">
+                    <span class="step-icon" aria-hidden="true">↗️</span>
+                    <span>Selecione "Abrir no Navegador"</span>
+                </div>
+            </div>
+
+            <div class="overlay-actions">
+                <button id="retry-escape" class="btn-primary">Tentar Abrir Novamente</button>
+                <button id="continue-here" class="btn-secondary">Abrir mesmo assim</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="engine.js" defer></script>
+</body>
+</html>
